@@ -1,39 +1,46 @@
-import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { 
-  Home, 
-  User, 
-  Plus, 
-  Search, 
-  Bell, 
-  Settings, 
-  Menu, 
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  Home,
+  User,
+  Plus,
+  Search,
+  Bell,
+  Settings,
+  Menu,
   X,
   Trophy,
   Star,
-  Users
-} from 'lucide-react'
+  Users,
+} from "lucide-react";
 
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { user, logout } = useAuth()
-  const location = useLocation()
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Browse Projects', href: '/browse-projects', icon: Search },
-    { name: 'Create Post', href: '/create-post', icon: Plus },
-    { name: 'My Profile', href: '/profile', icon: User },
-  ]
+    { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Browse Projects", href: "/browse-projects", icon: Search },
+    { name: "Create Post", href: "/create-post", icon: Plus },
+    { name: "My Profile", href: "/profile", icon: User },
+  ];
 
-  const isActive = (path) => location.pathname === path
+  const isActive = (path) => location.pathname === path;
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile sidebar */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+      <div
+        className={`fixed inset-0 z-50 lg:hidden ${
+          sidebarOpen ? "block" : "hidden"
+        }`}
+      >
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-75"
+          onClick={() => setSidebarOpen(false)}
+        />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white shadow-xl">
           <div className="flex h-16 items-center justify-between px-4">
             <h1 className="text-xl font-bold text-blue-600">CollabGrow</h1>
@@ -51,8 +58,8 @@ const Layout = ({ children }) => {
                 to={item.href}
                 className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActive(item.href)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -70,7 +77,7 @@ const Layout = ({ children }) => {
           <div className="flex h-16 items-center px-4">
             <h1 className="text-xl font-bold text-blue-600">CollabGrow</h1>
           </div>
-          
+
           {/* User info */}
           <div className="px-4 py-6 border-b border-gray-200">
             <div className="flex items-center space-x-3">
@@ -79,34 +86,12 @@ const Layout = ({ children }) => {
                 src={user?.avatar}
                 alt={user?.name}
               />
+              {/* use the */}
+
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
-                <p className="text-xs text-gray-500 truncate">{user?.level}</p>
-              </div>
-            </div>
-            
-            {/* Stats */}
-            <div className="mt-4 grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="flex items-center justify-center text-blue-600">
-                  <Trophy className="h-4 w-4 mr-1" />
-                  <span className="text-sm font-medium">{user?.badges?.length || 0}</span>
-                </div>
-                <p className="text-xs text-gray-500">Badges</p>
-              </div>
-              <div>
-                <div className="flex items-center justify-center text-green-600">
-                  <Star className="h-4 w-4 mr-1" />
-                  <span className="text-sm font-medium">{user?.collaborationStreak || 0}</span>
-                </div>
-                <p className="text-xs text-gray-500">Streak</p>
-              </div>
-              <div>
-                <div className="flex items-center justify-center text-purple-600">
-                  <Users className="h-4 w-4 mr-1" />
-                  <span className="text-sm font-medium">12</span>
-                </div>
-                <p className="text-xs text-gray-500">Projects</p>
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user?.name}
+                </p>
               </div>
             </div>
           </div>
@@ -119,8 +104,8 @@ const Layout = ({ children }) => {
                 to={item.href}
                 className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActive(item.href)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <item.icon className="mr-3 h-5 w-5" />
@@ -166,13 +151,11 @@ const Layout = ({ children }) => {
 
         {/* Page content */}
         <main className="py-6">
-          <div className="px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
+          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

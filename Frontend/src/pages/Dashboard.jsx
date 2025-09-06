@@ -20,7 +20,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
-              Welcome back, {user?.name?.split(' ')[0]}! ��
+              Welcome back, {user?.name?.split(' ')[0]}!
             </h1>
             <p className="text-blue-100 text-lg">
               Ready to collaborate and grow together? Let's make something amazing today.
@@ -36,7 +36,7 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link
           to="/create-post"
           className="card group hover:scale-105 transition-transform duration-200 text-center"
@@ -59,13 +59,7 @@ const Dashboard = () => {
           <p className="text-gray-600">Discover exciting projects to join</p>
         </Link>
 
-        <div className="card group hover:scale-105 transition-transform duration-200 text-center">
-          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
-            <TrendingUp className="h-8 w-8 text-purple-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Suggestions</h3>
-          <p className="text-gray-600">Get personalized project recommendations</p>
-        </div>
+      
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
