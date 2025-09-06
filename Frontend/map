@@ -1,0 +1,34 @@
+collabgrow/
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+├── postcss.config.js
+├── index.html
+├── .gitignore
+├── README.md
+└── /src
+    ├── main.jsx
+    ├── index.css
+    ├── App.jsx
+    ├── contexts/
+    │   ├── AuthContext.jsx
+    │   └── ProjectContext.jsx
+    ├── components/
+    │   ├── Layout.jsx
+    │   ├── ProjectCard.jsx
+    │   ├── SkillTag.jsx
+    │   ├── Badge.jsx
+    │   ├── ActivityFeed.jsx
+    │   ├── CollaborationChat.jsx
+    │   └── ProjectPitch.jsx
+    └── pages/
+        ├── Home.jsx
+        ├── SignIn.jsx
+        ├── SignUp.jsx
+        ├── Dashboard.jsx
+        ├── Profile.jsx
+        ├── EditProfile.jsx
+        ├── CreatePost.jsx
+        ├── BrowseProjects.jsx
+        ├── ProjectDetails.jsx
+        └── CollaborationSpace.jsx
