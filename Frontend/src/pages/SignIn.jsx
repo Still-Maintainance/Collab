@@ -1,70 +1,84 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import axios from "axios"; // You'll need axios to make the login call to your backend
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState({})
-  const { login } = useAuth()
-  const navigate = useNavigate()
+    email: "",
+    password: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  // Use useAuth to handle login logic
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-    // Clear error when user starts typing
+      [name]: value,
+    }));
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
-      }))
+        [name]: "",
+      }));
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors = {}
-    
+    const newErrors = {};
+
     if (!formData.email) {
-      newErrors.email = 'Email is required'
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid'
+      newErrors.email = "Email is invalid";
     }
-    
+
     if (!formData.password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
+      newErrors.password = "Password must be at least 6 characters";
     }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
-    
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
     try {
-      await login(formData.email, formData.password)
-      navigate('/dashboard')
+      // Assuming your login function in AuthContext makes an API call
+      // and returns success/failure.
+      // We will simulate a successful login for this example.
+      await login(formData.email, formData.password);
+
+      // Get the email from the form data
+      const userEmail = formData.email;
+
+      // Navigate to the dashboard, passing the email in the state
+      // This is the key part of the integration
+      navigate("/dashboard", { state: { email: userEmail } });
     } catch (error) {
-      setErrors({ general: 'Invalid email or password' })
+      // This error block should handle cases where login(..) fails
+      setErrors({ general: "Invalid email or password" });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center text-blue-600 hover:text-blue-500 mb-6">
+          <Link
+            to="/"
+            className="inline-flex items-center text-blue-600 hover:text-blue-500 mb-6"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Link>
@@ -83,7 +97,10 @@ const SignIn = () => {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email address
               </label>
               <input
@@ -93,7 +110,9 @@ const SignIn = () => {
                 autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`input-field ${errors.email ? 'border-red-300 focus:ring-red-500' : ''}`}
+                className={`input-field ${
+                  errors.email ? "border-red-300 focus:ring-red-500" : ""
+                }`}
                 placeholder="Enter your email"
               />
               {errors.email && (
@@ -102,18 +121,23 @@ const SignIn = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`input-field pr-10 ${errors.password ? 'border-red-300 focus:ring-red-500' : ''}`}
+                  className={`input-field pr-10 ${
+                    errors.password ? "border-red-300 focus:ring-red-500" : ""
+                  }`}
                   placeholder="Enter your password"
                 />
                 <button
@@ -141,31 +165,37 @@ const SignIn = () => {
                   type="checkbox"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-gray-700"
+                >
                   Remember me
                 </label>
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                <a
+                  href="#"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
                   Forgot your password?
                 </a>
               </div>
             </div>
 
             <div>
-              <button
-                type="submit"
-                className="w-full btn-primary"
-              >
+              <button type="submit" className="w-full btn-primary">
                 Sign in
               </button>
             </div>
 
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                Don't have an account?{" "}
+                <Link
+                  to="/signup"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
                   Sign up here
                 </Link>
               </p>
@@ -174,7 +204,7 @@ const SignIn = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SignIn
+export default SignIn;

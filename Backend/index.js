@@ -7,7 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Log the URI and DB name for debugging
 const uri = process.env.MONGO_URI;
 const dbName = "CollabGrowDB";
 console.log(`Attempting to connect to MongoDB cluster with URI: ${uri}`);
@@ -22,7 +21,9 @@ MongoClient.connect(uri)
     db = client.db(dbName);
     console.log(`Successfully selected database: ${dbName}`);
 
-    // POST route to insert form data - This will now only be active after the DB connection is ready
+    // All routes that interact with the database must be inside this block
+
+    // POST route to insert form data
     app.post("/submit", async (req, res) => {
       try {
         const data = req.body;
@@ -30,11 +31,11 @@ MongoClient.connect(uri)
         res.json({ success: true, id: result.insertedId });
       } catch (err) {
         console.error("Insert Error:", err);
-        // Log the specific error object for more detail
         res.status(500).json({ success: false, message: "Database Error" });
       }
     });
 
+    // Get all posts
     app.get("/api/posts", async (req, res) => {
       try {
         const data = await db.collection("posts").find({}).toArray();
@@ -45,13 +46,11 @@ MongoClient.connect(uri)
       }
     });
 
-    // CORRECTED: The route is now defined as '/api/posts' to match the frontend call.
+    // Post a new post
     app.post("/api/posts", async (req, res) => {
-      // Log that a request has been received at this endpoint
       console.log("POST request received at /api/posts");
       try {
         const data = req.body;
-        // Log the received data to see if it's arriving from the frontend
         console.log("Received data:", data);
 
         if (!data) {
@@ -64,19 +63,38 @@ MongoClient.connect(uri)
         res.json({ success: true, id: result.insertedId });
       } catch (err) {
         console.error("Insert Error:", err);
-        // Log the specific error object for more detail
         res.status(500).json({ success: false, message: "Database Error" });
       }
     });
 
-    const PORT = process.env.PORT || 5000;
+    // CORRECTED: The GET endpoint to fetch a profile is now in the correct location.
+    app.get("/profile/:email", async (req, res) => {
+      console.log(`GET request for profile received for: ${req.params.email}`);
+      try {
+        const userEmail = req.params.email;
+        const userProfile = await db
+          .collection("profile")
+          .findOne({ email: userEmail });
+
+        if (!userProfile) {
+          console.log(`Profile not found for email: ${userEmail}`);
+          return res.status(404).json({ message: "Profile not found." });
+        }
+        console.log(`Profile found for email: ${userEmail}`);
+        res.status(200).json(userProfile);
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+        res.status(500).json({ message: "Server error." });
+      }
+    });
+
+    const PORT =  5000;
     app.listen(PORT, () =>
       console.log(`Server running on http://localhost:${PORT}`)
     );
   })
   .catch((err) => {
     console.error("MongoDB connection failed:", err);
-    // Exit the process if the database connection fails
     process.exit(1);
   });
 

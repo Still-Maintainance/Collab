@@ -1,69 +1,44 @@
-import React, { createContext, useContext, useState } from 'react'
+// src/contexts/AuthContext.js
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { auth } from "../firebase";
+import {
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+} from "firebase/auth";
 
-const AuthContext = createContext()
+const AuthContext = createContext();
 
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
-}
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState({
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-    bio: 'Full-stack developer passionate about creating amazing user experiences',
-    skills: ['React', 'Node.js', 'Python', 'UI/UX Design'],
-    badges: ['Early Adopter', 'Team Player', 'Innovator'],
-    collaborationStreak: 15,
-    level: 'Expert',
-    joinDate: '2023-01-15',
-    location: 'San Francisco, CA',
-    website: 'https://johndoe.dev',
-    github: 'johndoe',
-    linkedin: 'johndoe'
-  })
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [isAuthenticated, setIsAuthenticated] = useState(true)
+  // ✅ Track auth state (login/logout)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
+  // Login function
   const login = (email, password) => {
-    // Mock login - in real app, this would make API call
-    setIsAuthenticated(true)
-    return Promise.resolve()
-  }
+    return signInWithEmailAndPassword(auth, email, password);
+  };
 
-  const register = (userData) => {
-    // Mock registration - in real app, this would make API call
-    setUser({ ...user, ...userData })
-    setIsAuthenticated(true)
-    return Promise.resolve()
-  }
-
+  // Logout function
   const logout = () => {
-    setIsAuthenticated(false)
-    setUser(null)
-  }
+    return signOut(auth);
+  };
 
-  const updateProfile = (updatedData) => {
-    setUser(prev => ({ ...prev, ...updatedData }))
-  }
-
-  const value = {
-    user,
-    isAuthenticated,
-    login,
-    register,
-    logout,
-    updateProfile
-  }
+  const value = { currentUser, login, logout };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
