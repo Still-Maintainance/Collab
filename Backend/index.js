@@ -72,7 +72,7 @@ MongoClient.connect(uri)
       console.log(`GET request for profile received for: ${req.params.email}`);
       try {
         const userEmail = req.params.email;
-        const userProfile = await db
+        const userProfile = await  db
           .collection("profile")
           .findOne({ email: userEmail });
 
