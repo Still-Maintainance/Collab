@@ -26,12 +26,7 @@ const Dashboard = () => {
               Ready to collaborate and grow together? Let's make something amazing today.
             </p>
           </div>
-          <div className="hidden md:block">
-            <div className="text-right">
-              <div className="text-2xl font-bold">{user?.collaborationStreak}</div>
-              <div className="text-blue-100">Day Streak</div>
-            </div>
-          </div>
+          
         </div>
       </div>
 
@@ -122,23 +117,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Projects */}
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Recent Projects</h2>
-          <Link
-            to="/browse-projects"
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            View All
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recentProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      </div>
+      
     </div>
   )
 }

@@ -9,8 +9,8 @@ app.use(express.json());
 
 // Log the URI and DB name for debugging
 const uri = process.env.MONGO_URI;
-const dbName = "CollabGrowDB" ;
-console.log(`Attempting to connect to MongoDB cluster with URI: ${uri}`); 
+const dbName = "CollabGrowDB";
+console.log(`Attempting to connect to MongoDB cluster with URI: ${uri}`);
 console.log(`Targeting database: ${dbName}`);
 
 let db;
@@ -27,6 +27,40 @@ MongoClient.connect(uri)
       try {
         const data = req.body;
         const result = await db.collection("profile").insertOne(data);
+        res.json({ success: true, id: result.insertedId });
+      } catch (err) {
+        console.error("Insert Error:", err);
+        // Log the specific error object for more detail
+        res.status(500).json({ success: false, message: "Database Error" });
+      }
+    });
+
+    app.get("/api/posts", async (req, res) => {
+      try {
+        const data = await db.collection("posts").find({}).toArray();
+        res.status(200).json(data);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+        res.status(500).json({ error: "Can't fetch data" });
+      }
+    });
+
+    // CORRECTED: The route is now defined as '/api/posts' to match the frontend call.
+    app.post("/api/posts", async (req, res) => {
+      // Log that a request has been received at this endpoint
+      console.log("POST request received at /api/posts");
+      try {
+        const data = req.body;
+        // Log the received data to see if it's arriving from the frontend
+        console.log("Received data:", data);
+
+        if (!data) {
+          return res
+            .status(400)
+            .json({ success: false, message: "No data received" });
+        }
+
+        const result = await db.collection("posts").insertOne(data);
         res.json({ success: true, id: result.insertedId });
       } catch (err) {
         console.error("Insert Error:", err);

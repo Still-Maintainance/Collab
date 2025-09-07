@@ -81,12 +81,7 @@ function App() {
                   </Layout>
                 }
               />
-              <Route
-                path="/updateprofile"
-                element={
-                    <ProfileUpdation />
-                }
-              />
+              <Route path="/updateprofile" element={<ProfileUpdation />} />
             </Routes>
           </div>
         </Router>
