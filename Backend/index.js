@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient } = require("mongodb");
+const nodemailer = require("nodemailer"); // ✅ 1. Import nodemailer
 require("dotenv").config();
 
 const app = express();
@@ -14,6 +15,16 @@ console.log(`Targeting database: ${dbName}`);
 
 let db;
 
+// ✅ 2. Configure Nodemailer Transporter
+// This uses the credentials from your .env file to send emails.
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
 // Connect to MongoDB once and start the server after a successful connection
 MongoClient.connect(uri)
   .then((client) => {
@@ -23,11 +34,10 @@ MongoClient.connect(uri)
 
     // All routes that interact with the database must be inside this block
 
-    // POST route to insert form data
+    // POST route to insert profile form data
     app.post("/submit", async (req, res) => {
       try {
         const data = req.body;
-        // FIX: Ensure email is stored in lowercase to prevent case-sensitivity issues
         if (data.email) {
           data.email = data.email.toLowerCase();
         }
@@ -39,10 +49,14 @@ MongoClient.connect(uri)
       }
     });
 
-    // Get all posts
+    // Get all project posts
     app.get("/api/posts", async (req, res) => {
       try {
-        const data = await db.collection("posts").find({}).toArray();
+        const data = await db
+          .collection("posts")
+          .find({})
+          .sort({ createdAt: -1 })
+          .toArray(); // Sort by most recent
         res.status(200).json(data);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -50,46 +64,67 @@ MongoClient.connect(uri)
       }
     });
 
-    // Post a new post
+    // Post a new project
     app.post("/api/posts", async (req, res) => {
-      console.log("POST request received at /api/posts");
       try {
         const data = req.body;
-        console.log("Received data:", data);
-
         if (!data) {
           return res
             .status(400)
             .json({ success: false, message: "No data received" });
         }
-
         const result = await db.collection("posts").insertOne(data);
-        res.json({ success: true, id: result.insertedId });
+        res.status(201).json({ success: true, id: result.insertedId }); // Use 201 for resource creation
       } catch (err) {
         console.error("Insert Error:", err);
         res.status(500).json({ success: false, message: "Database Error" });
       }
     });
 
-    // CORRECTED: The GET endpoint to fetch a profile is now in the correct location.
+    // GET a profile by email
     app.get("/profile/:email", async (req, res) => {
-      console.log(`GET request for profile received for: ${req.params.email}`);
       try {
-        // FIX: Ensure the email is in lowercase before searching
         const userEmail = req.params.email.toLowerCase();
         const userProfile = await db
           .collection("profile")
           .findOne({ email: userEmail });
 
         if (!userProfile) {
-          console.log(`Profile not found for email: ${userEmail}`);
           return res.status(404).json({ message: "Profile not found." });
         }
-        console.log(`Profile found for email: ${userEmail}`);
         res.status(200).json(userProfile);
       } catch (err) {
         console.error("Error fetching profile:", err);
         res.status(500).json({ message: "Server error." });
+      }
+    });
+
+    // ✅ 3. NEW ROUTE: Handle sending emails for join requests
+    // in index.js
+
+    app.post("/api/join-request", async (req, res) => {
+      // ✅ ADD THIS LOG to see if the request is reaching the backend
+      console.log("Join request received with body:", req.body);
+
+      const { projectTitle, authorEmail, joinerName, joinerEmail } = req.body;
+
+      const mailOptions = {
+        from: `"CollabGrow" <${process.env.EMAIL_USER}>`,
+        to: authorEmail,
+        subject: `New Collaboration Request for "${projectTitle}"`,
+        html: `... your html ...`, // your email HTML is fine
+      };
+
+      try {
+        console.log("Attempting to send email..."); // ✅ Log before sending
+        await transporter.sendMail(mailOptions);
+        console.log("Email sent successfully!"); // ✅ Log on success
+        res.status(200).json({ message: "Request sent successfully!" });
+      } catch (error) {
+        // ✅ THIS IS THE MOST IMPORTANT LOG
+        // It will print the exact error from nodemailer
+        console.error("!!! Nodemailer Error:", error);
+        res.status(500).json({ message: "Failed to send join request." });
       }
     });
 

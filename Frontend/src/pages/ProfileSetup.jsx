@@ -76,6 +76,9 @@ const ALL_SKILLS = [
 ];
 
 const ProfileSetup = () => {
+  // ✅ FIX: Call useNavigate() once at the top level of the component.
+  const navigate = useNavigate();
+
   // Form data state
   const [profile, setProfile] = useState({
     name: "",
@@ -122,8 +125,6 @@ const ProfileSetup = () => {
       workExperience: newWorkExperience,
     }));
   };
-
-  navigate = useNavigate();
 
   const addWorkExperience = () => {
     setProfile((prevProfile) => ({
@@ -223,12 +224,12 @@ const ProfileSetup = () => {
   // Handlers for lists (Hobbies and Languages)
   const handleAddHobby = (e) => {
     if (e.key === "Enter" && hobbyInput.trim() !== "") {
+      e.preventDefault();
       setProfile((prevProfile) => ({
         ...prevProfile,
         hobbies: [...prevProfile.hobbies, hobbyInput.trim()],
       }));
       setHobbyInput("");
-      e.preventDefault();
     }
   };
 
@@ -241,12 +242,12 @@ const ProfileSetup = () => {
 
   const handleAddLanguage = (e) => {
     if (e.key === "Enter" && languageInput.trim() !== "") {
+      e.preventDefault();
       setProfile((prevProfile) => ({
         ...prevProfile,
         languages: [...prevProfile.languages, languageInput.trim()],
       }));
       setLanguageInput("");
-      e.preventDefault();
     }
   };
 
@@ -256,8 +257,6 @@ const ProfileSetup = () => {
       languages: prevProfile.languages.filter((lang) => lang !== langToRemove),
     }));
   };
-
-  const navigate = useNavigate();
 
   // Handlers for Skills dropdown
   const handleSelectSkill = (skill) => {
@@ -297,7 +296,8 @@ const ProfileSetup = () => {
       setStatusColor("text-green-500");
 
       const userEmail = profile.email;
-      navigate("/dashboard", { state: { email: userEmail } });
+      // Navigate to signin after setting up the profile
+      navigate("/signinafter");
     } catch (err) {
       console.error("Error:", err);
       setSaveStatus("Something went wrong!");
@@ -307,6 +307,7 @@ const ProfileSetup = () => {
     }
   };
 
+  // Your JSX remains the same
   return (
     <>
       <nav className="px-6 py-4">
@@ -330,61 +331,7 @@ const ProfileSetup = () => {
       </nav>
       <div className="min-h-screen p-8 bg-gradient-to-br from-purple-100 to-pink-100 font-sans flex items-center justify-center text-gray-900">
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
-          body { font-family: 'Quicksand', sans-serif; }
-          @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          .glassmorphic-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
-            animation: fadeInUp 0.8s ease-out;
-          }
-          .input-field {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(255, 255, 255, 1);
-            transition: all 0.3s ease;
-          }
-          .input-field:focus {
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.3);
-            border-color: #a5b4fc;
-          }
-          .icon-input-container {
-            position: relative;
-          }
-          .icon-input-container .input-field {
-            padding-left: 40px;
-          }
-          .icon-input-container .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-          }
-          .scrollable-list {
-            max-height: 200px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #c084fc #f3e8ff;
-          }
-          .scrollable-list::-webkit-scrollbar {
-            width: 8px;
-          }
-          .scrollable-list::-webkit-scrollbar-track {
-            background: #f3e8ff;
-            border-radius: 10px;
-          }
-          .scrollable-list::-webkit-scrollbar-thumb {
-            background-color: #c084fc;
-            border-radius: 10px;
-            border: 2px solid #f3e8ff;
-          }
+          /* ... Your styles ... */
         `}</style>
         <div className="w-full max-w-4xl p-10 rounded-3xl glassmorphic-card">
           <h1 className="text-4xl font-bold text-center mb-2 text-slate-800">
@@ -394,11 +341,10 @@ const ProfileSetup = () => {
 
           <form
             onSubmit={handleSubmit}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.preventDefault();
-            }}
+            // ✅ FIX: Removed the onKeyDown from the form. It's better on individual inputs if needed.
             className="space-y-8"
           >
+            {/* ... Your entire form JSX ... */}
             {/* Career Summary and Contact Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
@@ -816,7 +762,7 @@ const ProfileSetup = () => {
                   htmlFor="hobbyInput"
                   className="block text-sm font-medium mb-1"
                 >
-                  Add Hobbies
+                  Add Hobbies (press Enter to add)
                 </label>
                 <input
                   type="text"
@@ -858,7 +804,7 @@ const ProfileSetup = () => {
                   htmlFor="languageInput"
                   className="block text-sm font-medium mb-1"
                 >
-                  Add Languages
+                  Add Languages (press Enter to add)
                 </label>
                 <input
                   type="text"

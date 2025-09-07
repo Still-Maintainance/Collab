@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, X } from "lucide-react";
-import axios from "axios"; // ✅ Import axios
+import axios from "axios";
+import { useAuth } from "../contexts/AuthContext"; // ✅ Import useAuth
 
 const CreatePost = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // ✅ Get the logged-in user from context
 
+  // ... (all your existing states: formData, errors, etc.)
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -20,8 +23,8 @@ const CreatePost = () => {
   const [errors, setErrors] = useState({});
   const [suggestedSkills, setSuggestedSkills] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState(null);
 
+  // ... (all your existing constants: availableSkills, categories, etc.)
   const availableSkills = [
     "React",
     "Node.js",
@@ -50,7 +53,6 @@ const CreatePost = () => {
     "Figma",
     "Adobe Creative Suite",
   ];
-
   const categories = [
     "Web App",
     "Mobile App",
@@ -69,17 +71,6 @@ const CreatePost = () => {
     "Content",
     "Other",
   ];
-
-  const budgetRanges = [
-    "No budget",
-    "$0 - $1,000",
-    "$1,000 - $5,000",
-    "$5,000 - $10,000",
-    "$10,000 - $25,000",
-    "$25,000 - $50,000",
-    "$50,000+",
-  ];
-
   const timelineOptions = [
     "1-2 weeks",
     "1 month",
@@ -90,10 +81,10 @@ const CreatePost = () => {
     "Ongoing",
   ];
 
+  // ... (all your existing handler functions: handleChange, handleSkillToggle, etc.)
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
     if (name === "description") {
       const suggested = availableSkills
         .filter(
@@ -104,7 +95,6 @@ const CreatePost = () => {
         .slice(0, 5);
       setSuggestedSkills(suggested);
     }
-
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
@@ -116,14 +106,12 @@ const CreatePost = () => {
         : [...prev.skills, skill],
     }));
   };
-
   const handleSkillRemove = (skillToRemove) => {
     setFormData((prev) => ({
       ...prev,
       skills: prev.skills.filter((skill) => skill !== skillToRemove),
     }));
   };
-
   const validateForm = () => {
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = "Project title is required";
@@ -135,54 +123,55 @@ const CreatePost = () => {
       newErrors.skills = "Please select at least one skill";
     if (!formData.deadline) newErrors.deadline = "Deadline is required";
     if (!formData.category) newErrors.category = "Category is required";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  setLoading(true);
+    // ✅ Ensure user is logged in before allowing post creation
+    if (!user) {
+      alert("You must be logged in to create a project.");
+      return;
+    }
 
-  const project = {
-    ...formData,
-    
+    setLoading(true);
+
+    // ✅ Add author info and creation date to the project data
+    const projectData = {
+      ...formData,
+      authorName: user.name,
+      authorEmail: user.email,
+      createdAt: new Date(),
+    };
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/posts",
+        projectData
+      );
+
+      if (res.status === 201) {
+        // Check for 201 Created status
+        alert("Project created successfully!");
+        navigate("/dashboard");
+      } else {
+        alert("Failed to create project!");
+      }
+    } catch (err) {
+      console.error("Project creation error:", err);
+      alert("An error occurred while creating the project.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  try {
-    const res = await axios.post("http://localhost:5000/api/posts", project);
-
-    if (res.status === 200 || res.status === 201) {
-      alert("Project created successfully!");
-       navigate("/dashboard");
-      
-      // Reset form after success
-      setFormData({
-        title: "",
-        description: "",
-        skills: [],
-        deadline: "",
-        category: "",
-        timeline: "",
-        maxCollaborators: 5,
-      });
-    } else {
-      alert("Failed to create project!");
-    }
-  } catch (err) {
-    alert("Failed to create project!");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
+  // ... (your entire JSX return statement)
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header */}
+    <div className="max-w-4xl mx-auto p-4">
+      {/* ... Header ... */}
       <div className="flex items-center mb-6">
         <button
           onClick={() => navigate("/dashboard")}
@@ -192,22 +181,9 @@ const handleSubmit = async (e) => {
         </button>
         <h1 className="text-2xl font-bold text-gray-900">Create New Project</h1>
       </div>
-
-      {/* Feedback Messages */}
-      {feedback && (
-        <div
-          className={`p-3 mb-4 rounded ${
-            feedback.type === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {feedback.message}
-        </div>
-      )}
-
-      <div className="card">
+      <div className="bg-white p-6 rounded-lg shadow-md">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* ... All your form fields (Title, Description, Skills, etc.) ... */}
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -218,14 +194,15 @@ const handleSubmit = async (e) => {
               type="text"
               value={formData.title}
               onChange={handleChange}
-              className={`input-field ${errors.title ? "border-red-300" : ""}`}
+              className={`w-full p-2 border ${
+                errors.title ? "border-red-300" : "border-gray-300"
+              } rounded-md`}
               placeholder="Enter project title"
             />
             {errors.title && (
               <p className="mt-1 text-sm text-red-600">{errors.title}</p>
             )}
           </div>
-
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -236,41 +213,18 @@ const handleSubmit = async (e) => {
               rows={4}
               value={formData.description}
               onChange={handleChange}
-              className={`input-field ${
-                errors.description ? "border-red-300" : ""
-              }`}
+              className={`w-full p-2 border ${
+                errors.description ? "border-red-300" : "border-gray-300"
+              } rounded-md`}
               placeholder="Describe your project"
             />
             <p className="mt-1 text-sm text-gray-500">
-              {formData.description.length}/500 characters (min 50)
+              {formData.description.length}/50 characters (min 50)
             </p>
             {errors.description && (
               <p className="mt-1 text-sm text-red-600">{errors.description}</p>
             )}
           </div>
-
-          {/* Suggested Skills */}
-          {suggestedSkills.length > 0 && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Suggested Skills
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {suggestedSkills.map((skill) => (
-                  <button
-                    key={skill}
-                    type="button"
-                    onClick={() => handleSkillToggle(skill)}
-                    className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200"
-                  >
-                    <Plus className="h-3 w-3 inline mr-1" />
-                    {skill}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Skills */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -279,7 +233,10 @@ const handleSubmit = async (e) => {
             {formData.skills.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
                 {formData.skills.map((skill) => (
-                  <span key={skill} className="skill-tag group">
+                  <span
+                    key={skill}
+                    className="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded flex items-center"
+                  >
                     {skill}
                     <button
                       type="button"
@@ -310,8 +267,7 @@ const handleSubmit = async (e) => {
               <p className="mt-1 text-sm text-red-600">{errors.skills}</p>
             )}
           </div>
-
-          {/* Details */}
+          {/* Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -321,9 +277,9 @@ const handleSubmit = async (e) => {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className={`input-field ${
-                  errors.category ? "border-red-300" : ""
-                }`}
+                className={`w-full p-2 border ${
+                  errors.category ? "border-red-300" : "border-gray-300"
+                } rounded-md`}
               >
                 <option value="">Select category</option>
                 {categories.map((category) => (
@@ -336,7 +292,6 @@ const handleSubmit = async (e) => {
                 <p className="mt-1 text-sm text-red-600">{errors.category}</p>
               )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Deadline *
@@ -346,15 +301,14 @@ const handleSubmit = async (e) => {
                 name="deadline"
                 value={formData.deadline}
                 onChange={handleChange}
-                className={`input-field ${
-                  errors.deadline ? "border-red-300" : ""
-                }`}
+                className={`w-full p-2 border ${
+                  errors.deadline ? "border-red-300" : "border-gray-300"
+                } rounded-md`}
               />
               {errors.deadline && (
                 <p className="mt-1 text-sm text-red-600">{errors.deadline}</p>
               )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Timeline
@@ -363,7 +317,7 @@ const handleSubmit = async (e) => {
                 name="timeline"
                 value={formData.timeline}
                 onChange={handleChange}
-                className="input-field"
+                className="w-full p-2 border border-gray-300 rounded-md"
               >
                 <option value="">Select timeline</option>
                 {timelineOptions.map((t) => (
@@ -373,7 +327,6 @@ const handleSubmit = async (e) => {
                 ))}
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Max Collaborators
@@ -385,21 +338,24 @@ const handleSubmit = async (e) => {
                 max="20"
                 value={formData.maxCollaborators}
                 onChange={handleChange}
-                className="input-field"
+                className="w-full p-2 border border-gray-300 rounded-md"
               />
             </div>
           </div>
-
           {/* Buttons */}
           <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="btn-secondary"
+              className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
             >
               Cancel
             </button>
-            <button type="submit" className="btn-primary" disabled={loading}>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              disabled={loading}
+            >
               {loading ? "Creating..." : "Create Project"}
             </button>
           </div>

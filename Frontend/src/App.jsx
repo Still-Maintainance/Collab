@@ -15,7 +15,6 @@ import ProjectDetails from "./pages/ProjectDetails";
 import CollaborationSpace from "./pages/CollaborationSpace";
 import ProfileUpdation from "./pages/ProfileUpdation";
 import ProfileSetup from "./pages/ProfileSetup";
-import SignInAfter from "./pages/SignInAfter";
 
 function App() {
   return (
@@ -86,7 +85,7 @@ function App() {
               <Route path="/updateprofile" element={<ProfileUpdation />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/profilesetup" element={<ProfileSetup />}></Route>
-              <Route path="/signinafter" element={<SignInAfter />}></Route>
+             
             </Routes>
           </div>
         </Router>

@@ -83,12 +83,15 @@ const Layout = ({ children }) => {
 
           {/* User info */}
           <div className="px-4 py-6 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-col items-center space-x-3">
               <img
                 className="h-12 w-12 rounded-full object-cover"
-                src={user?.avatar}
-                alt={user?.name}
+                src={
+                  user?.avatar ||
+                  "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+                }
               />
+
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.name}
