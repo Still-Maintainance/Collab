@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth'
 
 const AuthContext = createContext()
 
@@ -10,38 +11,57 @@ export const useAuth = () => {
   return context
 }
 
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState({
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-    bio: 'Full-stack developer passionate about creating amazing user experiences',
-    skills: ['React', 'Node.js', 'Python', 'UI/UX Design'],
-    badges: ['Early Adopter', 'Team Player', 'Innovator'],
-    collaborationStreak: 15,
-    level: 'Expert',
-    joinDate: '2023-01-15',
-    location: 'San Francisco, CA',
-    website: 'https://johndoe.dev',
-    github: 'johndoe',
-    linkedin: 'johndoe'
-  })
+  const [user, setUser] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const [isAuthenticated, setIsAuthenticated] = useState(true)
+  // Fetch user profile from backend using Firebase ID token
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        setIsAuthenticated(false);
+        setUser(null);
+        return;
+      }
+      try {
+        const idToken = await currentUser.getIdToken();
+        const res = await fetch('http://localhost:5000/me', {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        if (!res.ok) throw new Error('Failed to fetch profile');
+        const data = await res.json();
+        setUser(data);
+        setIsAuthenticated(true);
+      } catch (err) {
+        setIsAuthenticated(false);
+        setUser(null);
+      }
+    };
+    fetchProfile();
+  }, []);
 
-  const login = (email, password) => {
-    // Mock login - in real app, this would make API call
+
+  // You may want to update this login to use Firebase Auth
+  const login = async (email, password) => {
+    // This should use Firebase Auth signInWithEmailAndPassword
+    // and then fetch the profile as above
     setIsAuthenticated(true)
     return Promise.resolve()
   }
 
+
+  // You may want to update this register to use Firebase Auth
   const register = (userData) => {
-    // Mock registration - in real app, this would make API call
     setUser({ ...user, ...userData })
     setIsAuthenticated(true)
     return Promise.resolve()
   }
+
 
   const logout = () => {
     setIsAuthenticated(false)
@@ -52,13 +72,20 @@ export const AuthProvider = ({ children }) => {
     setUser(prev => ({ ...prev, ...updatedData }))
   }
 
+  // Reset password using Firebase Auth
+  const resetPassword = async (email) => {
+    const auth = getAuth();
+    await sendPasswordResetEmail(auth, email);
+  }
+
   const value = {
     user,
     isAuthenticated,
     login,
     register,
     logout,
-    updateProfile
+    updateProfile,
+    resetPassword
   }
 
   return (

@@ -16,13 +16,14 @@ const ProjectCard = ({ project }) => {
     addComment(project.id)
   }
 
-  const handleCollaborate = (e) => {
-    e.preventDefault()
-    requestCollaboration(project.id)
+
+  const handleCollaborate = async (e) => {
+    e.preventDefault();
+    // Send email using emailjs
   }
 
   return (
-    <div className="card group">
+  <div className="card group">
       <div className="relative">
         <img
           src={project.image}
@@ -97,12 +98,14 @@ const ProjectCard = ({ project }) => {
               {project.collaborators}/{project.maxCollaborators}
             </div>
           </div>
-          <Link
-            to={`/project/${project.id}`}
-            className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-          >
-            View Details
-          </Link>
+          <div className="flex items-center space-x-2">
+            <Link
+              to={`/project/${project.id}`}
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+            >
+              View Details
+            </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
+
 const express = require("express");
 const cors = require("cors");
 const { MongoClient } = require("mongodb");
+const authenticateFirebaseToken = require("./firebaseAuth");
 require("dotenv").config();
 
 const app = express();
@@ -22,6 +24,7 @@ MongoClient.connect(uri)
     db = client.db(dbName);
     console.log(`Successfully selected database: ${dbName}`);
 
+
     // POST route to insert form data - This will now only be active after the DB connection is ready
     app.post("/submit", async (req, res) => {
       try {
@@ -32,6 +35,21 @@ MongoClient.connect(uri)
         console.error("Insert Error:", err);
         // Log the specific error object for more detail
         res.status(500).json({ success: false, message: "Database Error" });
+      }
+    });
+
+    // /me endpoint: Get current user's profile from MongoDB using Firebase UID
+    app.get("/me", authenticateFirebaseToken, async (req, res) => {
+      try {
+        // Assuming user profiles are stored in the 'users' collection and have a 'firebaseUid' field
+        const user = await db.collection("users").findOne({ firebaseUid: req.firebaseUid });
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        res.json(user);
+      } catch (err) {
+        console.error("/me endpoint error:", err);
+        res.status(500).json({ error: "Database error" });
       }
     });
 

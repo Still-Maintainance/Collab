@@ -11,7 +11,6 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
   const { login } = useAuth()
-  const navigate = useNavigate()
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -47,11 +46,11 @@ const SignIn = () => {
     return Object.keys(newErrors).length === 0
   }
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
     if (!validateForm()) return
-    
     try {
       await login(formData.email, formData.password)
       navigate('/dashboard')
@@ -146,11 +145,7 @@ const SignIn = () => {
                 </label>
               </div>
 
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                  Forgot your password?
-                </a>
-              </div>
+              {/* Forgot password removed */}
             </div>
 
             <div>
@@ -160,6 +155,7 @@ const SignIn = () => {
               >
                 Sign in
               </button>
+              {/* Reset messages removed */}
             </div>
 
             <div className="text-center">
