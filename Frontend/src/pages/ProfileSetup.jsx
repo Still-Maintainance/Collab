@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+} from "react-router-dom";
 import {
   FaLinkedin,
   FaGithub,
@@ -10,6 +15,10 @@ import {
   FaBriefcase,
   FaCode,
   FaProjectDiagram,
+  FaCertificate,
+  FaTrophy,
+  FaLaugh,
+  FaLanguage,
 } from "react-icons/fa";
 
 // A large, representative list of skills for the searchable dropdown.
@@ -77,6 +86,11 @@ const ProfileSetup = () => {
     workExperience: [{ company: "", role: "", duration: "" }],
     projects: [{ name: "", description: "", link: "" }],
     skills: [],
+    certifications: [{ name: "", issuer: "", date: "" }],
+    achievements: [{ title: "", description: "" }],
+    hobbies: [],
+    languages: [],
+    date: new Date(),
   });
 
   // UI state
@@ -86,6 +100,8 @@ const ProfileSetup = () => {
   );
   const [statusColor, setStatusColor] = useState("text-slate-500");
   const [skillSearchQuery, setSkillSearchQuery] = useState("");
+  const [hobbyInput, setHobbyInput] = useState("");
+  const [languageInput, setLanguageInput] = useState("");
 
   // Handlers for form inputs
   const handleInputChange = (e) => {
@@ -106,6 +122,8 @@ const ProfileSetup = () => {
       workExperience: newWorkExperience,
     }));
   };
+
+  navigate = useNavigate();
 
   const addWorkExperience = () => {
     setProfile((prevProfile) => ({
@@ -150,6 +168,95 @@ const ProfileSetup = () => {
     setProfile((prevProfile) => ({ ...prevProfile, projects: newProjects }));
   };
 
+  // Handlers for dynamic sections (Certifications)
+  const handleCertificationChange = (index, e) => {
+    const { name, value } = e.target;
+    const newCerts = [...profile.certifications];
+    newCerts[index] = { ...newCerts[index], [name]: value };
+    setProfile((prevProfile) => ({ ...prevProfile, certifications: newCerts }));
+  };
+
+  const addCertification = () => {
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      certifications: [
+        ...prevProfile.certifications,
+        { name: "", issuer: "", date: "" },
+      ],
+    }));
+  };
+
+  const removeCertification = (index) => {
+    const newCerts = profile.certifications.filter((_, i) => i !== index);
+    setProfile((prevProfile) => ({ ...prevProfile, certifications: newCerts }));
+  };
+
+  // Handlers for dynamic sections (Achievements)
+  const handleAchievementChange = (index, e) => {
+    const { name, value } = e.target;
+    const newAchievements = [...profile.achievements];
+    newAchievements[index] = { ...newAchievements[index], [name]: value };
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      achievements: newAchievements,
+    }));
+  };
+
+  const addAchievement = () => {
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      achievements: [
+        ...prevProfile.achievements,
+        { title: "", description: "" },
+      ],
+    }));
+  };
+
+  const removeAchievement = (index) => {
+    const newAchievements = profile.achievements.filter((_, i) => i !== index);
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      achievements: newAchievements,
+    }));
+  };
+
+  // Handlers for lists (Hobbies and Languages)
+  const handleAddHobby = (e) => {
+    if (e.key === "Enter" && hobbyInput.trim() !== "") {
+      setProfile((prevProfile) => ({
+        ...prevProfile,
+        hobbies: [...prevProfile.hobbies, hobbyInput.trim()],
+      }));
+      setHobbyInput("");
+      e.preventDefault();
+    }
+  };
+
+  const handleRemoveHobby = (hobbyToRemove) => {
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      hobbies: prevProfile.hobbies.filter((hobby) => hobby !== hobbyToRemove),
+    }));
+  };
+
+  const handleAddLanguage = (e) => {
+    if (e.key === "Enter" && languageInput.trim() !== "") {
+      setProfile((prevProfile) => ({
+        ...prevProfile,
+        languages: [...prevProfile.languages, languageInput.trim()],
+      }));
+      setLanguageInput("");
+      e.preventDefault();
+    }
+  };
+
+  const handleRemoveLanguage = (langToRemove) => {
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      languages: prevProfile.languages.filter((lang) => lang !== langToRemove),
+    }));
+  };
+
   const navigate = useNavigate();
 
   // Handlers for Skills dropdown
@@ -176,10 +283,8 @@ const ProfileSetup = () => {
       !profile.skills.includes(skill)
   );
 
-  // In your ProfileSetup component's handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // ... (existing validation code)
 
     setIsSaving(true);
     setSaveStatus("Saving profile...");
@@ -191,13 +296,12 @@ const ProfileSetup = () => {
       setSaveStatus("Profile saved successfully! 🎉");
       setStatusColor("text-green-500");
 
-      // Get the user's email from the form's state
       const userEmail = profile.email;
-
-      // Navigate to the dashboard, passing the email in the state
       navigate("/dashboard", { state: { email: userEmail } });
     } catch (err) {
-      // ... (error handling)
+      console.error("Error:", err);
+      setSaveStatus("Something went wrong!");
+      setStatusColor("text-red-500");
     } finally {
       setIsSaving(false);
     }
@@ -571,6 +675,200 @@ const ProfileSetup = () => {
                     </button>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Certifications Section */}
+            <div className="p-6 rounded-3xl glassmorphic-card">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 text-slate-800">
+                  <FaCertificate className="text-2xl" />
+                  <h2 className="text-2xl font-semibold">Certifications</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={addCertification}
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors text-white text-3xl font-bold"
+                >
+                  +
+                </button>
+              </div>
+              <div className="space-y-6">
+                {profile.certifications.map((cert, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-2xl glassmorphic-card-inner"
+                  >
+                    <div className="flex-1 space-y-4 w-full">
+                      <input
+                        type="text"
+                        name="name"
+                        value={cert.name}
+                        onChange={(e) => handleCertificationChange(index, e)}
+                        placeholder="Certification Name"
+                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
+                      />
+                      <input
+                        type="text"
+                        name="issuer"
+                        value={cert.issuer}
+                        onChange={(e) => handleCertificationChange(index, e)}
+                        placeholder="Issuing Organization"
+                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
+                      />
+                      <input
+                        type="text"
+                        name="date"
+                        value={cert.date}
+                        onChange={(e) => handleCertificationChange(index, e)}
+                        placeholder="Date (e.g., Dec 2023)"
+                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeCertification(index)}
+                      className="mt-2 md:mt-0 px-6 py-2 bg-pink-500 hover:bg-pink-600 transition-colors rounded-xl font-medium text-white"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Achievements Section */}
+            <div className="p-6 rounded-3xl glassmorphic-card">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 text-slate-800">
+                  <FaTrophy className="text-2xl" />
+                  <h2 className="text-2xl font-semibold">Achievements</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={addAchievement}
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors text-white text-3xl font-bold"
+                >
+                  +
+                </button>
+              </div>
+              <div className="space-y-6">
+                {profile.achievements.map((ach, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-2xl glassmorphic-card-inner"
+                  >
+                    <div className="flex-1 space-y-4 w-full">
+                      <input
+                        type="text"
+                        name="title"
+                        value={ach.title}
+                        onChange={(e) => handleAchievementChange(index, e)}
+                        placeholder="Achievement Title"
+                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
+                      />
+                      <textarea
+                        name="description"
+                        value={ach.description}
+                        onChange={(e) => handleAchievementChange(index, e)}
+                        placeholder="Achievement Description"
+                        rows="3"
+                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
+                      ></textarea>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeAchievement(index)}
+                      className="mt-2 md:mt-0 px-6 py-2 bg-pink-500 hover:bg-pink-600 transition-colors rounded-xl font-medium text-white"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Hobbies Section */}
+            <div className="p-6 rounded-3xl glassmorphic-card">
+              <div className="flex items-center gap-2 mb-4 text-slate-800">
+                <FaLaugh className="text-2xl" />
+                <h2 className="text-2xl font-semibold">Hobbies</h2>
+              </div>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {profile.hobbies.map((hobby, index) => (
+                  <span
+                    key={index}
+                    className="flex items-center px-4 py-2 bg-purple-200 text-purple-800 rounded-full text-sm font-medium whitespace-nowrap transition-transform transform hover:scale-105"
+                  >
+                    {hobby}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveHobby(hobby)}
+                      className="ml-2 text-purple-600 hover:text-purple-900 transition-colors"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div>
+                <label
+                  htmlFor="hobbyInput"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Add Hobbies
+                </label>
+                <input
+                  type="text"
+                  id="hobbyInput"
+                  value={hobbyInput}
+                  onChange={(e) => setHobbyInput(e.target.value)}
+                  onKeyDown={handleAddHobby}
+                  placeholder="e.g., Hiking, Reading, Gaming"
+                  className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
+                />
+              </div>
+            </div>
+
+            {/* Languages Section */}
+            <div className="p-6 rounded-3xl glassmorphic-card">
+              <div className="flex items-center gap-2 mb-4 text-slate-800">
+                <FaLanguage className="text-2xl" />
+                <h2 className="text-2xl font-semibold">Languages Known</h2>
+              </div>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {profile.languages.map((lang, index) => (
+                  <span
+                    key={index}
+                    className="flex items-center px-4 py-2 bg-blue-200 text-blue-800 rounded-full text-sm font-medium whitespace-nowrap transition-transform transform hover:scale-105"
+                  >
+                    {lang}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveLanguage(lang)}
+                      className="ml-2 text-blue-600 hover:text-blue-900 transition-colors"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div>
+                <label
+                  htmlFor="languageInput"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Add Languages
+                </label>
+                <input
+                  type="text"
+                  id="languageInput"
+                  value={languageInput}
+                  onChange={(e) => setLanguageInput(e.target.value)}
+                  onKeyDown={handleAddLanguage}
+                  placeholder="e.g., English, Spanish, German"
+                  className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
+                />
               </div>
             </div>
 

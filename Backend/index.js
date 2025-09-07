@@ -27,6 +27,10 @@ MongoClient.connect(uri)
     app.post("/submit", async (req, res) => {
       try {
         const data = req.body;
+        // FIX: Ensure email is stored in lowercase to prevent case-sensitivity issues
+        if (data.email) {
+          data.email = data.email.toLowerCase();
+        }
         const result = await db.collection("profile").insertOne(data);
         res.json({ success: true, id: result.insertedId });
       } catch (err) {
@@ -71,8 +75,9 @@ MongoClient.connect(uri)
     app.get("/profile/:email", async (req, res) => {
       console.log(`GET request for profile received for: ${req.params.email}`);
       try {
-        const userEmail = req.params.email;
-        const userProfile = await  db
+        // FIX: Ensure the email is in lowercase before searching
+        const userEmail = req.params.email.toLowerCase();
+        const userProfile = await db
           .collection("profile")
           .findOne({ email: userEmail });
 
@@ -88,7 +93,7 @@ MongoClient.connect(uri)
       }
     });
 
-    const PORT =  5000;
+    const PORT = process.env.PORT || 5000;
     app.listen(PORT, () =>
       console.log(`Server running on http://localhost:${PORT}`)
     );

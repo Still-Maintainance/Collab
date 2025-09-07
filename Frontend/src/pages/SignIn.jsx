@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-import axios from "axios"; // You'll need axios to make the login call to your backend
+// axios is no longer needed here if AuthContext handles the API calls
+// import axios from "axios";
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +12,6 @@ const SignIn = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  // Use useAuth to handle login logic
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -54,19 +54,17 @@ const SignIn = () => {
     if (!validateForm()) return;
 
     try {
-      // Assuming your login function in AuthContext makes an API call
-      // and returns success/failure.
-      // We will simulate a successful login for this example.
+      // The `login` function in AuthContext will now handle all the complex logic:
+      // 1. Authenticate the user (e.g., with Firebase).
+      // 2. Save the user's email to localStorage.
+      // 3. Fetch the full user profile from your MongoDB backend.
       await login(formData.email, formData.password);
 
-      // Get the email from the form data
-      const userEmail = formData.email;
-
-      // Navigate to the dashboard, passing the email in the state
-      // This is the key part of the integration
-      navigate("/dashboard", { state: { email: userEmail } });
+      // Now navigate to the dashboard without passing any state.
+      // The dashboard component will get the data from localStorage/AuthContext.
+      navigate("/profile");
     } catch (error) {
-      // This error block should handle cases where login(..) fails
+      // This error block handles failures from the `login` function
       setErrors({ general: "Invalid email or password" });
     }
   };
