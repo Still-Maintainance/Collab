@@ -1,12 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaLinkedin,
   FaGithub,
@@ -76,7 +70,6 @@ const ALL_SKILLS = [
 ];
 
 const ProfileSetup = () => {
-  // ✅ FIX: Call useNavigate() once at the top level of the component.
   const navigate = useNavigate();
 
   // Form data state
@@ -109,171 +102,61 @@ const ProfileSetup = () => {
   // Handlers for form inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      [name]: value,
-    }));
+    setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handlers for dynamic sections (Work Experience)
-  const handleWorkExperienceChange = (index, e) => {
+  // Generic handler for dynamic array sections
+  const handleDynamicChange = (section, index, e) => {
     const { name, value } = e.target;
-    const newWorkExperience = [...profile.workExperience];
-    newWorkExperience[index] = { ...newWorkExperience[index], [name]: value };
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      workExperience: newWorkExperience,
+    const updatedSection = [...profile[section]];
+    updatedSection[index] = { ...updatedSection[index], [name]: value };
+    setProfile((prev) => ({ ...prev, [section]: updatedSection }));
+  };
+
+  const addDynamicItem = (section, newItem) => {
+    setProfile((prev) => ({
+      ...prev,
+      [section]: [...prev[section], newItem],
     }));
   };
 
-  const addWorkExperience = () => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      workExperience: [
-        ...prevProfile.workExperience,
-        { company: "", role: "", duration: "" },
-      ],
-    }));
-  };
-
-  const removeWorkExperience = (index) => {
-    const newWorkExperience = profile.workExperience.filter(
-      (_, i) => i !== index
-    );
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      workExperience: newWorkExperience,
-    }));
-  };
-
-  // Handlers for dynamic sections (Projects)
-  const handleProjectChange = (index, e) => {
-    const { name, value } = e.target;
-    const newProjects = [...profile.projects];
-    newProjects[index] = { ...newProjects[index], [name]: value };
-    setProfile((prevProfile) => ({ ...prevProfile, projects: newProjects }));
-  };
-
-  const addProject = () => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      projects: [
-        ...prevProfile.projects,
-        { name: "", description: "", link: "" },
-      ],
-    }));
-  };
-
-  const removeProject = (index) => {
-    const newProjects = profile.projects.filter((_, i) => i !== index);
-    setProfile((prevProfile) => ({ ...prevProfile, projects: newProjects }));
-  };
-
-  // Handlers for dynamic sections (Certifications)
-  const handleCertificationChange = (index, e) => {
-    const { name, value } = e.target;
-    const newCerts = [...profile.certifications];
-    newCerts[index] = { ...newCerts[index], [name]: value };
-    setProfile((prevProfile) => ({ ...prevProfile, certifications: newCerts }));
-  };
-
-  const addCertification = () => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      certifications: [
-        ...prevProfile.certifications,
-        { name: "", issuer: "", date: "" },
-      ],
-    }));
-  };
-
-  const removeCertification = (index) => {
-    const newCerts = profile.certifications.filter((_, i) => i !== index);
-    setProfile((prevProfile) => ({ ...prevProfile, certifications: newCerts }));
-  };
-
-  // Handlers for dynamic sections (Achievements)
-  const handleAchievementChange = (index, e) => {
-    const { name, value } = e.target;
-    const newAchievements = [...profile.achievements];
-    newAchievements[index] = { ...newAchievements[index], [name]: value };
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      achievements: newAchievements,
-    }));
-  };
-
-  const addAchievement = () => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      achievements: [
-        ...prevProfile.achievements,
-        { title: "", description: "" },
-      ],
-    }));
-  };
-
-  const removeAchievement = (index) => {
-    const newAchievements = profile.achievements.filter((_, i) => i !== index);
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      achievements: newAchievements,
+  const removeDynamicItem = (section, index) => {
+    setProfile((prev) => ({
+      ...prev,
+      [section]: prev[section].filter((_, i) => i !== index),
     }));
   };
 
   // Handlers for lists (Hobbies and Languages)
-  const handleAddHobby = (e) => {
-    if (e.key === "Enter" && hobbyInput.trim() !== "") {
+  const handleAddItemToList = (e, list, setInput, input) => {
+    if (e.key === "Enter" && input.trim() !== "") {
       e.preventDefault();
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        hobbies: [...prevProfile.hobbies, hobbyInput.trim()],
-      }));
-      setHobbyInput("");
+      if (!profile[list].includes(input.trim())) {
+        setProfile((prev) => ({
+          ...prev,
+          [list]: [...prev[list], input.trim()],
+        }));
+      }
+      setInput("");
     }
   };
 
-  const handleRemoveHobby = (hobbyToRemove) => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      hobbies: prevProfile.hobbies.filter((hobby) => hobby !== hobbyToRemove),
-    }));
-  };
-
-  const handleAddLanguage = (e) => {
-    if (e.key === "Enter" && languageInput.trim() !== "") {
-      e.preventDefault();
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        languages: [...prevProfile.languages, languageInput.trim()],
-      }));
-      setLanguageInput("");
-    }
-  };
-
-  const handleRemoveLanguage = (langToRemove) => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      languages: prevProfile.languages.filter((lang) => lang !== langToRemove),
+  const handleRemoveItemFromList = (list, itemToRemove) => {
+    setProfile((prev) => ({
+      ...prev,
+      [list]: prev[list].filter((item) => item !== itemToRemove),
     }));
   };
 
   // Handlers for Skills dropdown
   const handleSelectSkill = (skill) => {
     if (!profile.skills.includes(skill)) {
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        skills: [...prevProfile.skills, skill],
+      setProfile((prev) => ({
+        ...prev,
+        skills: [...prev.skills, skill],
       }));
       setSkillSearchQuery("");
     }
-  };
-
-  const handleRemoveSkill = (skill) => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      skills: prevProfile.skills.filter((s) => s !== skill),
-    }));
   };
 
   const filteredSkills = ALL_SKILLS.filter(
@@ -285,19 +168,29 @@ const ProfileSetup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (
+      !profile.name ||
+      !profile.email ||
+      !profile.linkedin ||
+      !profile.github
+    ) {
+      setSaveStatus("Please fill out all required fields marked with *");
+      setStatusColor("text-red-500");
+      return;
+    }
+
     setIsSaving(true);
     setSaveStatus("Saving profile...");
-    setStatusColor("text-gray-600");
+    setStatusColor("text-slate-600");
 
     try {
-      const res = await axios.post("http://localhost:5000/submit", profile);
-      console.log("Response:", res.data);
+      await axios.post("http://localhost:5000/submit", profile);
       setSaveStatus("Profile saved successfully! 🎉");
-      setStatusColor("text-green-500");
+      setStatusColor("text-green-600");
 
-      const userEmail = profile.email;
-      // Navigate to signin after setting up the profile
-      navigate("/signinafter");
+      setTimeout(() => {
+        navigate("/signinafter");
+      }, 1500); // Give user time to see success message
     } catch (err) {
       console.error("Error:", err);
       setSaveStatus("Something went wrong!");
@@ -307,51 +200,75 @@ const ProfileSetup = () => {
     }
   };
 
-  // Your JSX remains the same
   return (
     <>
-      <nav className="px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-600">CollabGrow</h1>
-          <div className="space-x-4">
-            <Link
-              to="/signin"
-              className="text-gray-600 text-m hover:text-gray-900 transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
-              className="text-m text-white w-30 bg-blue-600 rounded-xl p-2 hover:bg-blue-700 transition-colors"
-            >
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </nav>
-      <div className="min-h-screen p-8 bg-gradient-to-br from-purple-100 to-pink-100 font-sans flex items-center justify-center text-gray-900">
+      <div className="min-h-screen p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 font-sans flex items-center justify-center text-slate-800">
         <style>{`
-          /* ... Your styles ... */
+          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+          body { font-family: 'Poppins', sans-serif; }
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .glass-card {
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.8s ease-out;
+          }
+          .input-field {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(203, 213, 225, 0.7); /* slate-300 */
+            transition: all 0.3s ease;
+            color: #1e293b; /* slate-800 */
+          }
+          .input-field:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3); /* indigo-600 */
+            border-color: #6366f1; /* indigo-500 */
+          }
+          .input-field::placeholder {
+            color: #94a3b8; /* slate-400 */
+          }
+          .icon-input-container { position: relative; }
+          .icon-input-container .input-field { padding-left: 40px; }
+          .icon-input-container .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8; /* slate-400 */
+          }
+          .scrollable-list {
+            max-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #a5b4fc #eef2ff; /* indigo-300 indigo-50 */
+          }
+          .scrollable-list::-webkit-scrollbar { width: 6px; }
+          .scrollable-list::-webkit-scrollbar-track { background: #eef2ff; border-radius: 10px; }
+          .scrollable-list::-webkit-scrollbar-thumb { background-color: #a5b4fc; border-radius: 10px; }
         `}</style>
-        <div className="w-full max-w-4xl p-10 rounded-3xl glassmorphic-card">
-          <h1 className="text-4xl font-bold text-center mb-2 text-slate-800">
-            Build Your Profile ✨
+        <div className="w-full max-w-5xl p-6 sm:p-10 rounded-3xl glass-card">
+          <h1 className="text-4xl font-bold text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+            Create Your Profile
           </h1>
-          <p className={`text-center mb-8 ${statusColor}`}>{saveStatus}</p>
-
-          <form
-            onSubmit={handleSubmit}
-            // ✅ FIX: Removed the onKeyDown from the form. It's better on individual inputs if needed.
-            className="space-y-8"
+          <p
+            className={`text-center mb-8 transition-colors duration-300 ${statusColor}`}
           >
-            {/* ... Your entire form JSX ... */}
-            {/* Career Summary and Contact Info */}
+            {saveStatus}
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-10">
+            {/* General Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div className="icon-input-container">
                   <label
                     htmlFor="name"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-medium mb-1 text-slate-600"
                   >
                     Full Name <span className="text-red-500">*</span>
                   </label>
@@ -361,8 +278,8 @@ const ProfileSetup = () => {
                     name="name"
                     value={profile.name}
                     onChange={handleInputChange}
-                    placeholder="John Doe"
-                    className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
+                    placeholder="Your Name"
+                    className="w-full px-4 py-3 rounded-xl input-field"
                     required
                   />
                   <FaUser className="input-icon" />
@@ -370,7 +287,7 @@ const ProfileSetup = () => {
                 <div>
                   <label
                     htmlFor="careerSummary"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-medium mb-1 text-slate-600"
                   >
                     Career Summary
                   </label>
@@ -380,8 +297,8 @@ const ProfileSetup = () => {
                     value={profile.careerSummary}
                     onChange={handleInputChange}
                     rows="5"
-                    placeholder="Briefly describe your goals and aspirations..."
-                    className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
+                    placeholder="A brief professional summary..."
+                    className="w-full px-4 py-3 rounded-xl input-field"
                   ></textarea>
                 </div>
               </div>
@@ -389,9 +306,9 @@ const ProfileSetup = () => {
                 <div className="icon-input-container">
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-medium mb-1 text-slate-600"
                   >
-                    Email Address <span className="text-red-500">*</span>
+                    Email <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
@@ -399,8 +316,8 @@ const ProfileSetup = () => {
                     name="email"
                     value={profile.email}
                     onChange={handleInputChange}
-                    placeholder="john.doe@example.com"
-                    className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
+                    placeholder="your.email@example.com"
+                    className="w-full px-4 py-3 rounded-xl input-field"
                     required
                   />
                   <FaEnvelope className="input-icon" />
@@ -408,9 +325,9 @@ const ProfileSetup = () => {
                 <div className="icon-input-container">
                   <label
                     htmlFor="linkedin"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-medium mb-1 text-slate-600"
                   >
-                    LinkedIn Profile <span className="text-red-500">*</span>
+                    LinkedIn <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="url"
@@ -419,7 +336,7 @@ const ProfileSetup = () => {
                     value={profile.linkedin}
                     onChange={handleInputChange}
                     placeholder="https://linkedin.com/in/..."
-                    className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl input-field"
                     required
                   />
                   <FaLinkedin className="input-icon" />
@@ -427,9 +344,9 @@ const ProfileSetup = () => {
                 <div className="icon-input-container">
                   <label
                     htmlFor="github"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-medium mb-1 text-slate-600"
                   >
-                    GitHub Profile <span className="text-red-500">*</span>
+                    GitHub <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="url"
@@ -438,7 +355,7 @@ const ProfileSetup = () => {
                     value={profile.github}
                     onChange={handleInputChange}
                     placeholder="https://github.com/..."
-                    className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
+                    className="w-full px-4 py-3 rounded-xl input-field"
                     required
                   />
                   <FaGithub className="input-icon" />
@@ -446,391 +363,256 @@ const ProfileSetup = () => {
               </div>
             </div>
 
-            {/* Skills Section */}
-            <div className="p-6 rounded-3xl glassmorphic-card">
-              <div className="flex items-center gap-2 mb-4 text-slate-800">
-                <FaCode className="text-2xl" />
-                <h2 className="text-2xl font-semibold">Skills</h2>
-              </div>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {profile.skills.map((skill) => (
-                  <span
-                    key={skill}
-                    className="flex items-center px-4 py-2 bg-purple-200 text-purple-800 rounded-full text-sm font-medium whitespace-nowrap transition-transform transform hover:scale-105"
-                  >
-                    {skill}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="ml-2 text-purple-600 hover:text-purple-900 transition-colors"
+            {/* Sections */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Skills Section */}
+              <div className="p-6 rounded-2xl glass-card space-y-4">
+                <div className="flex items-center gap-3 text-indigo-600">
+                  <FaCode className="text-2xl" />
+                  <h2 className="text-2xl font-semibold">Skills</h2>
+                </div>
+                <div className="flex flex-wrap gap-2 min-h-[40px]">
+                  {profile.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium"
                     >
-                      &times;
-                    </button>
-                  </span>
-                ))}
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleRemoveItemFromList("skills", skill)
+                        }
+                        className="ml-2 text-indigo-500 hover:text-indigo-800"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={skillSearchQuery}
+                    onChange={(e) => setSkillSearchQuery(e.target.value)}
+                    placeholder="Search skills..."
+                    className="w-full px-4 py-2 rounded-lg input-field"
+                  />
+                  {skillSearchQuery && (
+                    <div className="absolute z-10 w-full mt-2 p-2 rounded-xl glass-card scrollable-list border border-slate-200">
+                      {filteredSkills.length > 0 ? (
+                        filteredSkills.map((skill) => (
+                          <div
+                            key={skill}
+                            onClick={() => handleSelectSkill(skill)}
+                            className="px-3 py-2 cursor-pointer hover:bg-indigo-100 rounded-lg"
+                          >
+                            {skill}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-slate-400 text-center text-sm p-2">
+                          No skills found.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="relative">
-                <label
-                  htmlFor="skillSearch"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Search & Select Skills
-                </label>
-                <input
-                  type="text"
-                  id="skillSearch"
-                  value={skillSearchQuery}
-                  onChange={(e) => setSkillSearchQuery(e.target.value)}
-                  placeholder="e.g., Python, React, Teamwork"
-                  className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
-                />
-                {skillSearchQuery && (
-                  <div className="absolute z-10 w-full mt-2 p-2 rounded-2xl glassmorphic-card scrollable-list border border-gray-200">
-                    {filteredSkills.length > 0 ? (
-                      filteredSkills.map((skill) => (
-                        <div
-                          key={skill}
-                          onClick={() => handleSelectSkill(skill)}
-                          className="px-3 py-2 cursor-pointer hover:bg-purple-50 rounded-xl transition-colors"
+
+              {/* Hobbies & Languages */}
+              <div className="space-y-8">
+                {["hobbies", "languages"].map((section) => (
+                  <div
+                    key={section}
+                    className="p-6 rounded-2xl glass-card space-y-3"
+                  >
+                    <div className="flex items-center gap-3 text-indigo-600">
+                      {section === "hobbies" ? (
+                        <FaLaugh className="text-xl" />
+                      ) : (
+                        <FaLanguage className="text-xl" />
+                      )}
+                      <h2 className="text-xl font-semibold capitalize">
+                        {section}
+                      </h2>
+                    </div>
+                    <div className="flex flex-wrap gap-2 min-h-[36px]">
+                      {profile[section].map((item) => (
+                        <span
+                          key={item}
+                          className="flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
                         >
-                          {skill}
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-400 text-center text-sm p-2">
-                        No skills found.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Dynamic Work Experience Section */}
-            <div className="p-6 rounded-3xl glassmorphic-card">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-slate-800">
-                  <FaBriefcase className="text-2xl" />
-                  <h2 className="text-2xl font-semibold">Work Experience</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={addWorkExperience}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors text-white text-3xl font-bold"
-                >
-                  +
-                </button>
-              </div>
-              <div className="space-y-6">
-                {profile.workExperience.map((exp, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-2xl glassmorphic-card-inner"
-                  >
-                    <div className="flex-1 space-y-4 w-full">
-                      <input
-                        type="text"
-                        name="company"
-                        value={exp.company}
-                        onChange={(e) => handleWorkExperienceChange(index, e)}
-                        placeholder="Company Name"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      />
-                      <input
-                        type="text"
-                        name="role"
-                        value={exp.role}
-                        onChange={(e) => handleWorkExperienceChange(index, e)}
-                        placeholder="Role"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      />
-                      <input
-                        type="text"
-                        name="duration"
-                        value={exp.duration}
-                        onChange={(e) => handleWorkExperienceChange(index, e)}
-                        placeholder="Duration (e.g., Jan 2022 - Present)"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      />
+                          {item}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveItemFromList(section, item)
+                            }
+                            className="ml-2 text-blue-500 hover:text-blue-800"
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeWorkExperience(index)}
-                      className="mt-2 md:mt-0 px-6 py-2 bg-pink-500 hover:bg-pink-600 transition-colors rounded-xl font-medium text-white"
-                    >
-                      Remove
-                    </button>
+                    <input
+                      type="text"
+                      value={section === "hobbies" ? hobbyInput : languageInput}
+                      onChange={(e) =>
+                        section === "hobbies"
+                          ? setHobbyInput(e.target.value)
+                          : setLanguageInput(e.target.value)
+                      }
+                      onKeyDown={(e) =>
+                        handleAddItemToList(
+                          e,
+                          section,
+                          section === "hobbies"
+                            ? setHobbyInput
+                            : setLanguageInput,
+                          section === "hobbies" ? hobbyInput : languageInput
+                        )
+                      }
+                      placeholder={`Add ${section.slice(
+                        0,
+                        -1
+                      )} and press Enter`}
+                      className="w-full px-4 py-2 rounded-lg input-field"
+                    />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Dynamic Projects Section */}
-            <div className="p-6 rounded-3xl glassmorphic-card">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-slate-800">
-                  <FaProjectDiagram className="text-2xl" />
-                  <h2 className="text-2xl font-semibold">Projects</h2>
+            {/* Dynamic Sections */}
+            {[
+              {
+                key: "workExperience",
+                title: "Work Experience",
+                icon: FaBriefcase,
+                fields: [
+                  { name: "company", placeholder: "Company" },
+                  { name: "role", placeholder: "Role" },
+                  { name: "duration", placeholder: "e.g., Jan 2022 - Present" },
+                ],
+              },
+              {
+                key: "projects",
+                title: "Projects",
+                icon: FaProjectDiagram,
+                fields: [
+                  { name: "name", placeholder: "Project Name" },
+                  {
+                    name: "description",
+                    placeholder: "Description",
+                    type: "textarea",
+                  },
+                  { name: "link", placeholder: "Project Link" },
+                ],
+              },
+              {
+                key: "certifications",
+                title: "Certifications",
+                icon: FaCertificate,
+                fields: [
+                  { name: "name", placeholder: "Certificate Name" },
+                  { name: "issuer", placeholder: "Issuing Body" },
+                  { name: "date", placeholder: "Date Issued" },
+                ],
+              },
+              {
+                key: "achievements",
+                title: "Achievements",
+                icon: FaTrophy,
+                fields: [
+                  { name: "title", placeholder: "Achievement Title" },
+                  {
+                    name: "description",
+                    placeholder: "Description",
+                    type: "textarea",
+                  },
+                ],
+              },
+            ].map((section) => (
+              <div key={section.key} className="p-6 rounded-2xl glass-card">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3 text-indigo-600">
+                    <section.icon className="text-2xl" />
+                    <h2 className="text-2xl font-semibold">{section.title}</h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      addDynamicItem(
+                        section.key,
+                        section.fields.reduce(
+                          (acc, field) => ({ ...acc, [field.name]: "" }),
+                          {}
+                        )
+                      )
+                    }
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-indigo-500 hover:bg-indigo-600 transition text-white text-2xl font-bold"
+                  >
+                    +
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={addProject}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors text-white text-3xl font-bold"
-                >
-                  +
-                </button>
-              </div>
-              <div className="space-y-6">
-                {profile.projects.map((proj, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-2xl glassmorphic-card-inner"
-                  >
-                    <div className="flex-1 space-y-4 w-full">
-                      <input
-                        type="text"
-                        name="name"
-                        value={proj.name}
-                        onChange={(e) => handleProjectChange(index, e)}
-                        placeholder="Project Name"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      />
-                      <textarea
-                        name="description"
-                        value={proj.description}
-                        onChange={(e) => handleProjectChange(index, e)}
-                        placeholder="Project Description"
-                        rows="3"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      ></textarea>
-                      <input
-                        type="url"
-                        name="link"
-                        value={proj.link}
-                        onChange={(e) => handleProjectChange(index, e)}
-                        placeholder="Project Link (Optional)"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeProject(index)}
-                      className="mt-2 md:mt-0 px-6 py-2 bg-pink-500 hover:bg-pink-600 transition-colors rounded-xl font-medium text-white"
+                <div className="space-y-6">
+                  {profile[section.key].map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col md:flex-row items-start gap-4 p-4 rounded-xl glass-card"
                     >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Certifications Section */}
-            <div className="p-6 rounded-3xl glassmorphic-card">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-slate-800">
-                  <FaCertificate className="text-2xl" />
-                  <h2 className="text-2xl font-semibold">Certifications</h2>
+                      <div className="flex-1 space-y-4 w-full">
+                        {section.fields.map((field) =>
+                          field.type === "textarea" ? (
+                            <textarea
+                              key={field.name}
+                              name={field.name}
+                              value={item[field.name]}
+                              onChange={(e) =>
+                                handleDynamicChange(section.key, index, e)
+                              }
+                              placeholder={field.placeholder}
+                              rows="3"
+                              className="w-full px-4 py-2 rounded-lg input-field"
+                            ></textarea>
+                          ) : (
+                            <input
+                              key={field.name}
+                              type="text"
+                              name={field.name}
+                              value={item[field.name]}
+                              onChange={(e) =>
+                                handleDynamicChange(section.key, index, e)
+                              }
+                              placeholder={field.placeholder}
+                              className="w-full px-4 py-2 rounded-lg input-field"
+                            />
+                          )
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeDynamicItem(section.key, index)}
+                        className="mt-2 md:mt-0 px-4 py-2 bg-red-500 hover:bg-red-600 transition rounded-lg font-medium text-white text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={addCertification}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors text-white text-3xl font-bold"
-                >
-                  +
-                </button>
               </div>
-              <div className="space-y-6">
-                {profile.certifications.map((cert, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-2xl glassmorphic-card-inner"
-                  >
-                    <div className="flex-1 space-y-4 w-full">
-                      <input
-                        type="text"
-                        name="name"
-                        value={cert.name}
-                        onChange={(e) => handleCertificationChange(index, e)}
-                        placeholder="Certification Name"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      />
-                      <input
-                        type="text"
-                        name="issuer"
-                        value={cert.issuer}
-                        onChange={(e) => handleCertificationChange(index, e)}
-                        placeholder="Issuing Organization"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      />
-                      <input
-                        type="text"
-                        name="date"
-                        value={cert.date}
-                        onChange={(e) => handleCertificationChange(index, e)}
-                        placeholder="Date (e.g., Dec 2023)"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeCertification(index)}
-                      className="mt-2 md:mt-0 px-6 py-2 bg-pink-500 hover:bg-pink-600 transition-colors rounded-xl font-medium text-white"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Achievements Section */}
-            <div className="p-6 rounded-3xl glassmorphic-card">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-slate-800">
-                  <FaTrophy className="text-2xl" />
-                  <h2 className="text-2xl font-semibold">Achievements</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={addAchievement}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 transition-colors text-white text-3xl font-bold"
-                >
-                  +
-                </button>
-              </div>
-              <div className="space-y-6">
-                {profile.achievements.map((ach, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-2xl glassmorphic-card-inner"
-                  >
-                    <div className="flex-1 space-y-4 w-full">
-                      <input
-                        type="text"
-                        name="title"
-                        value={ach.title}
-                        onChange={(e) => handleAchievementChange(index, e)}
-                        placeholder="Achievement Title"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      />
-                      <textarea
-                        name="description"
-                        value={ach.description}
-                        onChange={(e) => handleAchievementChange(index, e)}
-                        placeholder="Achievement Description"
-                        rows="3"
-                        className="w-full px-4 py-3 rounded-xl input-field text-gray-900 placeholder-gray-400"
-                      ></textarea>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeAchievement(index)}
-                      className="mt-2 md:mt-0 px-6 py-2 bg-pink-500 hover:bg-pink-600 transition-colors rounded-xl font-medium text-white"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Hobbies Section */}
-            <div className="p-6 rounded-3xl glassmorphic-card">
-              <div className="flex items-center gap-2 mb-4 text-slate-800">
-                <FaLaugh className="text-2xl" />
-                <h2 className="text-2xl font-semibold">Hobbies</h2>
-              </div>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {profile.hobbies.map((hobby, index) => (
-                  <span
-                    key={index}
-                    className="flex items-center px-4 py-2 bg-purple-200 text-purple-800 rounded-full text-sm font-medium whitespace-nowrap transition-transform transform hover:scale-105"
-                  >
-                    {hobby}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveHobby(hobby)}
-                      className="ml-2 text-purple-600 hover:text-purple-900 transition-colors"
-                    >
-                      &times;
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div>
-                <label
-                  htmlFor="hobbyInput"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Add Hobbies (press Enter to add)
-                </label>
-                <input
-                  type="text"
-                  id="hobbyInput"
-                  value={hobbyInput}
-                  onChange={(e) => setHobbyInput(e.target.value)}
-                  onKeyDown={handleAddHobby}
-                  placeholder="e.g., Hiking, Reading, Gaming"
-                  className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
-                />
-              </div>
-            </div>
-
-            {/* Languages Section */}
-            <div className="p-6 rounded-3xl glassmorphic-card">
-              <div className="flex items-center gap-2 mb-4 text-slate-800">
-                <FaLanguage className="text-2xl" />
-                <h2 className="text-2xl font-semibold">Languages Known</h2>
-              </div>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {profile.languages.map((lang, index) => (
-                  <span
-                    key={index}
-                    className="flex items-center px-4 py-2 bg-blue-200 text-blue-800 rounded-full text-sm font-medium whitespace-nowrap transition-transform transform hover:scale-105"
-                  >
-                    {lang}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveLanguage(lang)}
-                      className="ml-2 text-blue-600 hover:text-blue-900 transition-colors"
-                    >
-                      &times;
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div>
-                <label
-                  htmlFor="languageInput"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Add Languages (press Enter to add)
-                </label>
-                <input
-                  type="text"
-                  id="languageInput"
-                  value={languageInput}
-                  onChange={(e) => setLanguageInput(e.target.value)}
-                  onKeyDown={handleAddLanguage}
-                  placeholder="e.g., English, Spanish, German"
-                  className="w-full px-4 py-3 rounded-2xl input-field text-gray-900 placeholder-gray-400"
-                />
-              </div>
-            </div>
+            ))}
 
             {/* Save Button */}
             <div className="text-center pt-4">
               <button
                 type="submit"
                 disabled={isSaving}
-                className={`w-full max-w-sm py-4 rounded-full font-bold transition-all text-white transform hover:scale-105
-                            ${
-                              isSaving
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-gradient-to-r from-blue-400 to-violet-500 hover:from-blue-500 hover:to-violet-600"
-                            }`}
+                className="w-full max-w-sm py-3 rounded-full font-bold transition-all text-white transform hover:scale-105 disabled:bg-slate-400 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
               >
-                {isSaving ? "Saving..." : "Save Profile"}
+                {isSaving ? "Saving..." : "Create Profile & Continue"}
               </button>
             </div>
           </form>
