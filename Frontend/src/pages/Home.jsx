@@ -23,10 +23,10 @@ const Home = () => {
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 animate-fade-in">
-            Collaborate, Create,{" "}
+          <h1 className="text-7xl md:text-6xl font-bold text-gray-900 mb-6 animate-fade-in">
+            Collab, Create,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              Grow Together
+              Grow
             </span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto animate-fade-in">

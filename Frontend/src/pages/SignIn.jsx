@@ -2,76 +2,67 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-// axios is no longer needed here if AuthContext handles the API calls
-// import axios from "axios";
+import { FcGoogle } from "react-icons/fc"; // Google icon
 
 const SignIn = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
+  // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
+  // Validate form
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
-
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Email/password login
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     try {
-      // The `login` function in AuthContext will now handle all the complex logic:
-      // 1. Authenticate the user (e.g., with Firebase).
-      // 2. Save the user's email to localStorage.
-      // 3. Fetch the full user profile from your MongoDB backend.
       await login(formData.email, formData.password);
-
-      // Now navigate to the dashboard without passing any state.
-      // The dashboard component will get the data from localStorage/AuthContext.
-      navigate("/profile");
+      navigate("/dashboard");
     } catch (error) {
-      // This error block handles failures from the `login` function
       setErrors({ general: "Invalid email or password" });
+    }
+  };
+
+  // Google login
+  const handleGoogleSignIn = async () => {
+    try {
+      await loginWithGoogle();
+      navigate("/dashboard");
+    } catch (error) {
+      setErrors({ general: "Google sign-in failed. Please try again." });
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Header */}
         <div className="text-center">
           <Link
             to="/"
@@ -86,14 +77,17 @@ const SignIn = () => {
           </p>
         </div>
 
+        {/* Card */}
         <div className="glass rounded-2xl p-8 shadow-xl">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* General error */}
             {errors.general && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {errors.general}
               </div>
             )}
 
+            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -118,6 +112,7 @@ const SignIn = () => {
               )}
             </div>
 
+            {/* Password */}
             <div>
               <label
                 htmlFor="password"
@@ -155,6 +150,7 @@ const SignIn = () => {
               )}
             </div>
 
+            {/* Remember me & Forgot password */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -181,15 +177,37 @@ const SignIn = () => {
               </div>
             </div>
 
+            {/* Sign in button */}
             <div>
               <button type="submit" className="w-full btn-primary">
                 Sign in
               </button>
             </div>
 
+            {/* Divider */}
+            <div className="relative flex items-center justify-center">
+              <span className="absolute bg-white px-2 text-gray-500 text-sm">
+                OR
+              </span>
+              <hr className="w-full border-gray-300" />
+            </div>
+
+            {/* Google login */}
+            <div>
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                className="w-full flex items-center justify-center border border-gray-300 rounded-lg py-2 px-4 shadow-sm bg-white hover:bg-gray-50"
+              >
+                <FcGoogle className="h-5 w-5 mr-2" />
+                Sign in with Google
+              </button>
+            </div>
+
+            {/* Signup link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
                   to="/signup"
                   className="font-medium text-blue-600 hover:text-blue-500"

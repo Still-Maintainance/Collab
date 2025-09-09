@@ -92,7 +92,7 @@ const ProfileSetup = () => {
   // UI state
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(
-    "Let's build your amazing profile!"
+    "Let's build your amazing profile! 🎉"
   );
   const [statusColor, setStatusColor] = useState("text-slate-500");
   const [skillSearchQuery, setSkillSearchQuery] = useState("");
@@ -189,7 +189,7 @@ const ProfileSetup = () => {
       setStatusColor("text-green-600");
 
       setTimeout(() => {
-        navigate("/signinafter");
+        navigate("/signin");
       }, 1500); // Give user time to see success message
     } catch (err) {
       console.error("Error:", err);
@@ -202,7 +202,7 @@ const ProfileSetup = () => {
 
   return (
     <>
-      <div className="min-h-screen p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-indigo-100 font-sans flex items-center justify-center text-slate-800">
+      <div className="min-h-screen p-4 sm:p-8 bg-gradient-to-br from-white to-blue-50 font-sans flex items-center justify-center text-slate-800">
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
           body { font-family: 'Poppins', sans-serif; }
@@ -211,22 +211,22 @@ const ProfileSetup = () => {
             to { opacity: 1; transform: translateY(0); }
           }
           .glass-card {
-            background: rgba(255, 255, 255, 0.6); 
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.05);
             animation: fadeInUp 0.8s ease-out;
           }
           .input-field {
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(203, 213, 225, 0.7); /* slate-300 */
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(226, 232, 240, 0.7); /* slate-200 */
             transition: all 0.3s ease;
             color: #1e293b; /* slate-800 */
           }
           .input-field:focus {
             outline: none;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3); /* indigo-600 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* indigo-500 with opacity */
             border-color: #6366f1; /* indigo-500 */
           }
           .input-field::placeholder {
@@ -245,14 +245,14 @@ const ProfileSetup = () => {
             max-height: 200px;
             overflow-y: auto;
             scrollbar-width: thin;
-            scrollbar-color: #a5b4fc #eef2ff; /* indigo-300 indigo-50 */
+            scrollbar-color: #93c5fd #dbeafe; /* blue-300 blue-100 */
           }
           .scrollable-list::-webkit-scrollbar { width: 6px; }
           .scrollable-list::-webkit-scrollbar-track { background: #eef2ff; border-radius: 10px; }
-          .scrollable-list::-webkit-scrollbar-thumb { background-color: #a5b4fc; border-radius: 10px; }
+          .scrollable-list::-webkit-scrollbar-thumb { background-color: #93c5fd; border-radius: 10px; }
         `}</style>
         <div className="w-full max-w-5xl p-6 sm:p-10 rounded-3xl glass-card">
-          <h1 className="text-4xl font-bold text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+          <h1 className="text-4xl font-bold text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">
             Create Your Profile
           </h1>
           <p
@@ -367,7 +367,7 @@ const ProfileSetup = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Skills Section */}
               <div className="p-6 rounded-2xl glass-card space-y-4">
-                <div className="flex items-center gap-3 text-indigo-600">
+                <div className="flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">
                   <FaCode className="text-2xl" />
                   <h2 className="text-2xl font-semibold">Skills</h2>
                 </div>
@@ -375,7 +375,7 @@ const ProfileSetup = () => {
                   {profile.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium"
+                      className="flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
                     >
                       {skill}
                       <button
@@ -383,7 +383,7 @@ const ProfileSetup = () => {
                         onClick={() =>
                           handleRemoveItemFromList("skills", skill)
                         }
-                        className="ml-2 text-indigo-500 hover:text-indigo-800"
+                        className="ml-2 text-blue-500 hover:text-blue-800"
                       >
                         &times;
                       </button>
@@ -405,7 +405,7 @@ const ProfileSetup = () => {
                           <div
                             key={skill}
                             onClick={() => handleSelectSkill(skill)}
-                            className="px-3 py-2 cursor-pointer hover:bg-indigo-100 rounded-lg"
+                            className="px-3 py-2 cursor-pointer hover:bg-blue-100 rounded-lg"
                           >
                             {skill}
                           </div>
@@ -427,13 +427,13 @@ const ProfileSetup = () => {
                     key={section}
                     className="p-6 rounded-2xl glass-card space-y-3"
                   >
-                    <div className="flex items-center gap-3 text-indigo-600">
+                    <div className="flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">
                       {section === "hobbies" ? (
-                        <FaLaugh className="text-xl" />
+                        <FaLaugh className="text-2xl" />
                       ) : (
-                        <FaLanguage className="text-xl" />
+                        <FaLanguage className="text-2xl" />
                       )}
-                      <h2 className="text-xl font-semibold capitalize">
+                      <h2 className="text-2xl font-semibold capitalize">
                         {section}
                       </h2>
                     </div>
@@ -441,7 +441,7 @@ const ProfileSetup = () => {
                       {profile[section].map((item) => (
                         <span
                           key={item}
-                          className="flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                          className="flex items-center px-3 py-1 bg-violet-100 text-violet-800 rounded-full text-sm"
                         >
                           {item}
                           <button
@@ -449,7 +449,7 @@ const ProfileSetup = () => {
                             onClick={() =>
                               handleRemoveItemFromList(section, item)
                             }
-                            className="ml-2 text-blue-500 hover:text-blue-800"
+                            className="ml-2 text-violet-500 hover:text-violet-800"
                           >
                             &times;
                           </button>
@@ -474,10 +474,7 @@ const ProfileSetup = () => {
                           section === "hobbies" ? hobbyInput : languageInput
                         )
                       }
-                      placeholder={`Add ${section.slice(
-                        0,
-                        -1
-                      )} and press Enter`}
+                      placeholder={`Add ${section.slice(0, -1)} and press Enter`}
                       className="w-full px-4 py-2 rounded-lg input-field"
                     />
                   </div>
@@ -537,7 +534,7 @@ const ProfileSetup = () => {
             ].map((section) => (
               <div key={section.key} className="p-6 rounded-2xl glass-card">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3 text-indigo-600">
+                  <div className="flex items-center gap-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">
                     <section.icon className="text-2xl" />
                     <h2 className="text-2xl font-semibold">{section.title}</h2>
                   </div>
@@ -552,7 +549,7 @@ const ProfileSetup = () => {
                         )
                       )
                     }
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-indigo-500 hover:bg-indigo-600 transition text-white text-2xl font-bold"
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 transition-all duration-300 text-white text-2xl font-bold transform hover:scale-110"
                   >
                     +
                   </button>
@@ -595,7 +592,7 @@ const ProfileSetup = () => {
                       <button
                         type="button"
                         onClick={() => removeDynamicItem(section.key, index)}
-                        className="mt-2 md:mt-0 px-4 py-2 bg-red-500 hover:bg-red-600 transition rounded-lg font-medium text-white text-sm"
+                        className="mt-2 md:mt-0 px-4 py-2 bg-rose-500 hover:bg-rose-600 transition rounded-lg font-medium text-white text-sm"
                       >
                         Remove
                       </button>
@@ -610,7 +607,7 @@ const ProfileSetup = () => {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="w-full max-w-sm py-3 rounded-full font-bold transition-all text-white transform hover:scale-105 disabled:bg-slate-400 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+                className="w-full max-w-sm py-3 rounded-full font-bold transition-all text-white transform hover:scale-105 disabled:bg-slate-400 disabled:cursor-not-allowed bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700"
               >
                 {isSaving ? "Saving..." : "Create Profile & Continue"}
               </button>

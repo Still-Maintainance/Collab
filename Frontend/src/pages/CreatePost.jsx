@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext"; // ✅ Import useAuth
+import { useProjects } from "../contexts/ProjectContext";
 
 const CreatePost = () => {
   const navigate = useNavigate();
   const { user } = useAuth(); // ✅ Get the logged-in user from context
+  const { addProject } = useProjects();
 
   // ... (all your existing states: formData, errors, etc.)
   const [formData, setFormData] = useState({
@@ -155,6 +157,10 @@ const CreatePost = () => {
 
       if (res.status === 201) {
         // Check for 201 Created status
+        addProject({
+          ...projectData,
+          // Optionally, add any returned backend fields (like _id)
+        });
         alert("Project created successfully!");
         navigate("/dashboard");
       } else {
@@ -179,7 +185,9 @@ const CreatePost = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Create New Project</h1>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent">
+          Create New Project
+        </h1>
       </div>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -353,7 +361,8 @@ const CreatePost = () => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className={`px-4 py-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white rounded-md 
+              hover:from-blue-600 hover:to-violet-600 transition duration-300`}
               disabled={loading}
             >
               {loading ? "Creating..." : "Create Project"}
